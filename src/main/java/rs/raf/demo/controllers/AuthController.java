@@ -10,8 +10,6 @@ import rs.raf.demo.requests.LoginRequest;
 import rs.raf.demo.responses.LoginResponse;
 import rs.raf.demo.services.UserService;
 import rs.raf.demo.utils.JwtUtil;
-//import rs.edu.raf.spring_project.model.AuthReq;
-//import rs.edu.raf.spring_project.model.AuthRes;
 
 @RestController
 @CrossOrigin
@@ -36,10 +34,9 @@ public class AuthController {
             e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
+        this.userService.loggedIn(loginRequest.getUsername());
 
-        UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
-
-        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(userDetails)));
+        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(loginRequest.getUsername())));
     }
 
 }
