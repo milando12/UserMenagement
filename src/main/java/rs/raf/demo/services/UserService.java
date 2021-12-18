@@ -1,42 +1,43 @@
 package rs.raf.demo.services;
 
-import org.hibernate.StaleStateException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import rs.raf.demo.model.User;
 import rs.raf.demo.repositories.UserRepository;
 
-import javax.persistence.OptimisticLockException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class UserService implements UserDetailsService {
 
+    private PasswordEncoder passwordEncoder;
+
     private UserRepository userRepository;
     private TaskScheduler taskScheduler;
 
     @Autowired
-    public UserService(UserRepository userRepository, TaskScheduler taskScheduler) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, TaskScheduler taskScheduler) {
+        this.passwordEncoder = passwordEncoder;
+
         this.userRepository = userRepository;
         this.taskScheduler = taskScheduler;
     }
 
     @Override
-    @Transactional(propagation = Propagation.NESTED,isolation = Isolation.SERIALIZABLE)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User myUser = this.findByUsername(username);
         if(myUser == null) {
@@ -46,12 +47,19 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(myUser.getUsername(), myUser.getPassword(), new ArrayList<>());
     }
 
-    @Transactional(propagation = Propagation.NESTED,isolation = Isolation.SERIALIZABLE)
+    public User create(User user) {
+        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+        return this.userRepository.save(user);
+    }
+
+    public Page<User> paginate(Integer page, Integer size) {
+        return this.userRepository.findAll(PageRequest.of(page, size, Sort.by("salary").descending()));
+    }
+
     public User findByUsername(String username) {
         return this.userRepository.findByUsername(username);
     }
 
-    @Transactional(propagation = Propagation.NESTED,isolation = Isolation.SERIALIZABLE)
     public void loggedIn(String username) {
         User user = this.userRepository.findByUsername(username);
         Integer loginCount = user.getLoginCount();
@@ -86,7 +94,6 @@ public class UserService implements UserDetailsService {
 //    }
 
     @Scheduled(cron = "0 * * * * *", zone = "Europe/Belgrade")
-    @Transactional
     public void increaseUserBalance() {
         System.out.println("Increasing balance...");
 //        this.userRepository.increaseBalance(1);
