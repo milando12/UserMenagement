@@ -19,6 +19,8 @@ import rs.raf.demo.filters.JwtFilter;
 import rs.raf.demo.services.UserService;
 
 @EnableWebSecurity
+@EnableScheduling
+@EnableAsync
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;

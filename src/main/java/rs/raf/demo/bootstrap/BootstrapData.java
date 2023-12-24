@@ -2,15 +2,11 @@ package rs.raf.demo.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.raf.demo.model.*;
 import rs.raf.demo.repositories.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
@@ -30,20 +26,36 @@ public class BootstrapData implements CommandLineRunner {
 
         System.out.println("Loading Data...");
 
-        User user1 = new User();
-        user1.setUsername("user1");
-        user1.setPassword(this.passwordEncoder.encode("user1"));
-        this.userRepository.save(user1);
+        User admin = new User();
+        admin.setName("Admin");
+        admin.setSurname("Admin");
+        admin.setEmail("admin@gmail.com");
+        admin.setPassword(this.passwordEncoder.encode("admin"));
+        admin.setPermissions("can_create_users,can_read_users,can_update_users,can_delete_users");
+        this.userRepository.save(admin);
 
-        User user2 = new User();
-        user2.setUsername("user2");
-        user2.setPassword(this.passwordEncoder.encode("user2"));
-        this.userRepository.save(user2);
+        User c = new User();
+        c.setName("c");
+        c.setSurname("c");
+        c.setEmail("c@gmail.com");
+        c.setPassword(this.passwordEncoder.encode("c"));
+        c.setPermissions("can_create_users");
+        this.userRepository.save(c);
 
-        User user3 = new User();
-        user3.setUsername("user3");
-        user3.setPassword(this.passwordEncoder.encode("user3"));
-        this.userRepository.save(user3);
+        User r = new User();
+        r.setName("r");
+        r.setSurname("r");
+        r.setEmail("r@gmail.com");
+        r.setPassword(this.passwordEncoder.encode("r"));
+        r.setPermissions("can_read_users");
+        this.userRepository.save(r);
+
+        User n = new User();
+        n.setName("n");
+        n.setSurname("n");
+        n.setEmail("n@gmail.com");
+        n.setPassword(this.passwordEncoder.encode("n"));
+        this.userRepository.save(n);
 
         System.out.println("Data loaded!");
     }

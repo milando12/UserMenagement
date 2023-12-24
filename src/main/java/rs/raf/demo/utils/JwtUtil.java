@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-    private final String SECRET_KEY = "MY JWT SECRET";
+    private final String SECRET_KEY = "Shinken";
 
     public Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
